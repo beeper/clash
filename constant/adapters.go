@@ -30,7 +30,7 @@ const (
 )
 
 const (
-	DefaultTCPTimeout = 30 * time.Second
+	DefaultTCPTimeout = 60 * time.Second
 	DefaultUDPTimeout = DefaultTCPTimeout
 	DefaultTLSTimeout = DefaultTCPTimeout
 )
