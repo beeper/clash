@@ -4,11 +4,13 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/Dreamacro/clash/component/auth"
 	"github.com/Dreamacro/clash/component/resolver"
 	"github.com/Dreamacro/clash/config"
 	"github.com/Dreamacro/clash/constant"
 	"github.com/Dreamacro/clash/hub/executor"
 	P "github.com/Dreamacro/clash/listener"
+	authStore "github.com/Dreamacro/clash/listener/auth"
 	"github.com/Dreamacro/clash/log"
 	"github.com/Dreamacro/clash/tunnel"
 
@@ -21,6 +23,7 @@ func configRouter() http.Handler {
 	r.Get("/", getConfigs)
 	r.Put("/", updateConfigs)
 	r.Patch("/", patchConfigs)
+	r.Put("/users", putUsers)
 	return r
 }
 
@@ -35,6 +38,23 @@ func pointerOrDefault(p *int, def int) int {
 	}
 
 	return def
+}
+
+func putUsers(w http.ResponseWriter, r *http.Request) {
+	req := struct {
+		Users []auth.AuthUser `json:"users"`
+	}{}
+	if err := render.DecodeJSON(r.Body, &req); err != nil {
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, ErrBadRequest)
+		return
+	}
+
+	authenticator := auth.NewAuthenticator(req.Users)
+	authStore.SetAuthenticator(authenticator)
+	if authenticator != nil {
+		log.Infoln("Authentication of local server updated")
+	}
 }
 
 func patchConfigs(w http.ResponseWriter, r *http.Request) {
