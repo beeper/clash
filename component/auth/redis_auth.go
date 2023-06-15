@@ -13,7 +13,7 @@ type redisAuthenticator struct {
 	cache *cache.LruCache
 }
 
-func NewRedisAuthenticator(url, key string) Authenticator {
+func NewRedisAuthenticator(url, key string, cacheSeconds int64) Authenticator {
 	opts, err := redis.ParseURL(url)
 	if err != nil {
 		panic(err)
@@ -23,7 +23,7 @@ func NewRedisAuthenticator(url, key string) Authenticator {
 	authenticator := &redisAuthenticator{
 		redisClient,
 		key,
-		cache.New(cache.WithAge(10)),
+		cache.New(cache.WithAge(cacheSeconds)),
 	}
 	return authenticator
 }

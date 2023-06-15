@@ -198,7 +198,7 @@ func updateUsers(users []auth.AuthUser, redisAuth config.RedisAuth) {
 	var authenticator auth.Authenticator
 
 	if redisAuth.Url != "" {
-		authenticator = auth.NewRedisAuthenticator(redisAuth.Url, redisAuth.Key)
+		authenticator = auth.NewRedisAuthenticator(redisAuth.Url, redisAuth.Key, redisAuth.CacheSeconds)
 	} else {
 		authenticator = auth.NewAuthenticator(users)
 	}

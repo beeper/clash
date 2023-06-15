@@ -188,8 +188,9 @@ func (t *Tunnel) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 type RedisAuth struct {
-	Url string `yaml:"url"`
-	Key string `yaml:"key"`
+	Url          string `yaml:"url"`
+	Key          string `yaml:"key"`
+	CacheSeconds int64  `yaml:"cache-seconds"`
 }
 
 type RawConfig struct {
