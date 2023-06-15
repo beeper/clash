@@ -103,6 +103,7 @@ type Config struct {
 	Proxies      map[string]C.Proxy
 	Providers    map[string]providerTypes.ProxyProvider
 	Tunnels      []Tunnel
+	RedisAuth    RedisAuth
 }
 
 type RawDNS struct {
@@ -186,6 +187,11 @@ func (t *Tunnel) UnmarshalYAML(unmarshal func(any) error) error {
 	return nil
 }
 
+type RedisAuth struct {
+	Url string `yaml:"url"`
+	Key string `yaml:"key"`
+}
+
 type RawConfig struct {
 	Port               int          `yaml:"port"`
 	SocksPort          int          `yaml:"socks-port"`
@@ -213,6 +219,8 @@ type RawConfig struct {
 	Proxy         []map[string]any          `yaml:"proxies"`
 	ProxyGroup    []map[string]any          `yaml:"proxy-groups"`
 	Rule          []string                  `yaml:"rules"`
+
+	RedisAuth RedisAuth `yaml:"redis-authentication"`
 }
 
 // Parse config
@@ -309,6 +317,11 @@ func ParseRawConfig(rawCfg *RawConfig) (*Config, error) {
 			return nil, fmt.Errorf("tunnel proxy %s not found", t.Proxy)
 		}
 	}
+
+	if len(config.Users) > 0 && rawCfg.RedisAuth.Url != "" {
+		return nil, fmt.Errorf("cannot have both redis auth and regular auth")
+	}
+	config.RedisAuth = rawCfg.RedisAuth
 
 	return config, nil
 }

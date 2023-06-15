@@ -67,7 +67,7 @@ func ApplyConfig(cfg *config.Config, force bool) {
 	mux.Lock()
 	defer mux.Unlock()
 
-	updateUsers(cfg.Users)
+	updateUsers(cfg.Users, cfg.RedisAuth)
 	updateProxies(cfg.Proxies, cfg.Providers)
 	updateRules(cfg.Rules)
 	updateHosts(cfg.Hosts)
@@ -194,8 +194,15 @@ func updateGeneral(general *config.General, force bool) {
 	listener.ReCreateMixed(general.MixedPort, tcpIn, udpIn)
 }
 
-func updateUsers(users []auth.AuthUser) {
-	authenticator := auth.NewAuthenticator(users)
+func updateUsers(users []auth.AuthUser, redisAuth config.RedisAuth) {
+	var authenticator auth.Authenticator
+
+	if redisAuth.Url != "" {
+		authenticator = auth.NewRedisAuthenticator(redisAuth.Url, redisAuth.Key)
+	} else {
+		authenticator = auth.NewAuthenticator(users)
+	}
+
 	authStore.SetAuthenticator(authenticator)
 	if authenticator != nil {
 		log.Infoln("Authentication of local server updated")
