@@ -15,8 +15,12 @@ RUN --mount=target=. \
 FROM alpine:latest
 LABEL org.opencontainers.image.source="https://github.com/Dreamacro/clash"
 
+RUN apk add --no-cache envsubst
+
+COPY ./fly-config.yaml /fly-config.yaml
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /
-ENTRYPOINT ["/clash"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
